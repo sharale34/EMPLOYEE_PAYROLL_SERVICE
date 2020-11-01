@@ -10,49 +10,54 @@ public class EmployeePayrollService {
 	}
 
 	private List<EmployeePayrollData> employeePayrollList;
-
-	public EmployeePayrollService() {
-	}
+	private EmployeePayrollDBService employeePayrollDBService;
 
 	public EmployeePayrollService(List<EmployeePayrollData> employeePayrollList) {
+		this();
 		this.employeePayrollList = employeePayrollList;
 	}
 
-	public static void main(String[] args) {
-		ArrayList<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-		EmployeePayrollService employeePayrollService = new EmployeePayrollService(employeePayrollList);
-		Scanner consoleInputReader = new Scanner(System.in);
-		employeePayrollService.readEmployeePayrollData(consoleInputReader);
-		employeePayrollService.writeEmployeePayrollData(IOService.CONSOLE_IO);
+	public EmployeePayrollService() {
+		employeePayrollDBService = EmployeePayrollDBService.getInstance();
 	}
 
 	private void readEmployeePayrollData(Scanner consoleInputReader) {
-		System.out.println("Enter the employee ID : ");
+		System.out.println("Enter Employee ID: ");
 		int id = consoleInputReader.nextInt();
-		System.out.println("Enter the employee name : ");
+		System.out.println("Enter Employee Name ");
 		String name = consoleInputReader.next();
-		System.out.println("Enter the employee's salary : ");
-		double salary = consoleInputReader.nextDouble();
-
+		System.out.println("Enter Employee Salary");
+		Double salary = consoleInputReader.nextDouble();
 		employeePayrollList.add(new EmployeePayrollData(id, name, salary));
 	}
 
 	public void writeEmployeePayrollData(IOService ioService) {
 		if (ioService.equals(IOService.CONSOLE_IO))
-			System.out.println("Writing Employee payroll data on Console: " + employeePayrollList);
-		else if (ioService.equals(IOService.FILE_IO))
+			System.out.println("Employee Payroll Data " + employeePayrollList);
+		else if (ioService.equals(IOService.FILE_IO)) {
 			new EmployeePayrollFileIOService().writeData(employeePayrollList);
-
+		}
 	}
 
-	public void printData(IOService ioService) {
-		if (ioService.equals(IOService.FILE_IO))
+	public static void main(String[] args) {
+		System.out.println("Welcome to Employee Payroll Service");
+		ArrayList<EmployeePayrollData> employeePayrollList = new ArrayList<>();
+		EmployeePayrollService employeePayroll = new EmployeePayrollService(employeePayrollList);
+		Scanner consoleInputReader = new Scanner(System.in);
+		employeePayroll.readEmployeePayrollData(consoleInputReader);
+		employeePayroll.writeEmployeePayrollData(IOService.CONSOLE_IO);
+	}
+
+	public void printData(IOService fileIo) {
+		if (fileIo.equals(IOService.FILE_IO)) {
 			new EmployeePayrollFileIOService().printData();
+		}
 	}
 
-	public long countEntries(IOService ioService) {
-		if (ioService.equals(IOService.FILE_IO))
+	public long countEntries(IOService fileIo) {
+		if (fileIo.equals(IOService.FILE_IO)) {
 			return new EmployeePayrollFileIOService().countEntries();
+		}
 		return 0;
 	}
 
@@ -64,7 +69,30 @@ public class EmployeePayrollService {
 
 	public List<EmployeePayrollData> readEmployeePayrollData(IOService ioService) {
 		if (ioService.equals(IOService.DB_IO))
-			this.employeePayrollList = new EmployeePayrollDBService().readData();
-		return employeePayrollList;
+			this.employeePayrollList = employeePayrollDBService.readData();
+		return this.employeePayrollList;
+	}
+
+	public void updateEmployeeSalary(String name, double salary) throws PayrollSystemException {
+		int result = employeePayrollDBService.updateEmployeeData(name, salary);
+		if (result == 0) {
+			throw new PayrollSystemException("no rows updated",
+					PayrollSystemException.ExceptionType.UPDATE_FILE_EXCEPTION); // throwing a custom exception if no
+																					// records updated
+		}
+		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
+		if (employeePayrollData != null) // if its not null we update the salary
+			employeePayrollData.salary = salary;
+	}
+
+	private EmployeePayrollData getEmployeePayrollData(String name) {
+		// converting list into stream and filtering by name
+		return this.employeePayrollList.stream().filter(empPayrollDataItem -> empPayrollDataItem.name.equals(name))
+				.findFirst().orElse(null);
+	}
+
+	public boolean checkEmployeePayrollInSyncWithDB(String name) {
+		List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.getEmployeePayrollData(name);
+		return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
 	}
 }
