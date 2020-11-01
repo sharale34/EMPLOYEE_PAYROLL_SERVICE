@@ -1,5 +1,6 @@
 package com.bridgelabz.employeepayroll;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,5 +59,16 @@ public class EmployeePayrollServiceTest {
 		employeePayrollService.updateEmployeeSalary("terisa", 3000000.0);
 		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("terisa");
 		Assert.assertTrue(result);
+	}
+
+	@Test
+	public void givenDateRange_WhenRetrieved_ShouldMatchEmployeeCount() {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
+		LocalDate startDate = LocalDate.of(2018, 01, 01);
+		LocalDate endDate = LocalDate.now();
+		List<EmployeePayrollData> employeePayrollData = employeePayrollService
+				.readEmployeePayrollForDateRange(IOService.DB_IO, startDate, endDate);
+		Assert.assertEquals(3, employeePayrollData.size());
 	}
 }
