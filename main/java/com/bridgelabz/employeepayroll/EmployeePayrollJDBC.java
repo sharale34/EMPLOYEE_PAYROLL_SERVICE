@@ -20,6 +20,7 @@ public class EmployeePayrollJDBC {
 			throw new IllegalStateException("Cannot find driver in classpath!", e);
 		}
 		listDrivers();
+		//creating connection to the database
 		try {
 			System.out.println("Connecting to database: " + jdbcURL);
 			connection = DriverManager.getConnection(jdbcURL, userName, password);
