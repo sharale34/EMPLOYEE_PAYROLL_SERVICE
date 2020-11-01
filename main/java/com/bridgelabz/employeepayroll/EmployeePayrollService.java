@@ -3,6 +3,7 @@ package com.bridgelabz.employeepayroll;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class EmployeePayrollService {
@@ -12,6 +13,7 @@ public class EmployeePayrollService {
 
 	private List<EmployeePayrollData> employeePayrollList;
 	private EmployeePayrollDBService employeePayrollDBService;
+	private Map<String, Double> genderToAverageSalaryMap;
 
 	public EmployeePayrollService(List<EmployeePayrollData> employeePayrollList) {
 		this();
@@ -102,5 +104,19 @@ public class EmployeePayrollService {
 		if (ioService.equals(IOService.DB_IO))
 			this.employeePayrollList = employeePayrollDBService.getEmployeeForDateRange(startDate, endDate);
 		return this.employeePayrollList;
+	}
+
+	public Map<String, Double> getAvgSalary(IOService ioService) throws PayrollSystemException {
+		try {
+			if (ioService.equals(IOService.DB_IO))
+				this.genderToAverageSalaryMap = employeePayrollDBService.getAverageSalaryByGender();
+			if (genderToAverageSalaryMap.isEmpty()) {
+				throw new PayrollSystemException("no data retrieved",
+						PayrollSystemException.ExceptionType.RETRIEVE_EXCEPTION);
+			}
+		} catch (PayrollSystemException e) {
+			System.out.println(e);
+		}
+		return genderToAverageSalaryMap;
 	}
 }

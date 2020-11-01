@@ -3,6 +3,7 @@ package com.bridgelabz.employeepayroll;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -70,5 +71,16 @@ public class EmployeePayrollServiceTest {
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService
 				.readEmployeePayrollForDateRange(IOService.DB_IO, startDate, endDate);
 		Assert.assertEquals(3, employeePayrollData.size());
+	}
+
+	@Test
+	public void findSumAverageMinMaxCount_ofEmployees_ShouldMatchEmployeeCount() throws PayrollSystemException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
+		Map<String, Double> genderToAverageSalaryMap = employeePayrollService.getAvgSalary(IOService.DB_IO);
+		Double avgSalaryMale = 50000.0;
+		Assert.assertEquals(avgSalaryMale, genderToAverageSalaryMap.get("M"));
+		Double avgSalaryFemale = 3000000.0;
+		Assert.assertEquals(avgSalaryFemale, genderToAverageSalaryMap.get("F"));
 	}
 }
