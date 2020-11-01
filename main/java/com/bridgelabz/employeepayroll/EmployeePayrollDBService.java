@@ -38,11 +38,12 @@ public class EmployeePayrollDBService {
 	public List<EmployeePayrollData> readData() {
 		String sql = "SELECT * FROM employee_payroll; ";
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-		// object used for executing a static SQL statement and returning the results it produces
+		// object used for executing a static SQL statement and returning the results it
+		// produces
 		try (Connection connection = this.getConnection();) {
 			Statement statement = connection.createStatement();
 			ResultSet result = statement.executeQuery(sql);
-			employeePayrollList=this.getEmployeePayrollData(result);
+			employeePayrollList = this.getEmployeePayrollData(result);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -64,15 +65,29 @@ public class EmployeePayrollDBService {
 		return 0;
 	}
 
+	public int updateEmployeeDataUsingPreparedStatement(String name, double salary) {
+		try (Connection connection = this.getConnection();) {
+			String sql = "update employee_payroll set salary=? where name=?";
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setDouble(1, salary);
+			preparedStatement.setString(2, name);
+			int status = preparedStatement.executeUpdate();
+			return status;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
 	public List<EmployeePayrollData> getEmployeePayrollData(String name) {
 		List<EmployeePayrollData> employeeParollList = null;
 		if (this.employeePayrollDataStatement == null)
 			this.prepareStatementForEmployeeData();
 		try {
-			employeePayrollDataStatement.setString(1,name);
-			ResultSet resultSet=employeePayrollDataStatement.executeQuery();
-			employeeParollList= this.getEmployeePayrollData(resultSet);
-		}catch (SQLException e) {
+			employeePayrollDataStatement.setString(1, name);
+			ResultSet resultSet = employeePayrollDataStatement.executeQuery();
+			employeeParollList = this.getEmployeePayrollData(resultSet);
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return employeeParollList;
@@ -88,7 +103,7 @@ public class EmployeePayrollDBService {
 				LocalDate startDate = result.getDate("start").toLocalDate();
 				employeePayrollList.add(new EmployeePayrollData(id, name, Salary, startDate));
 			}
-		}catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return employeePayrollList;
