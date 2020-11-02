@@ -119,4 +119,8 @@ public class EmployeePayrollService {
 		}
 		return genderToAverageSalaryMap;
 	}
+
+	public void addEmployeePayrollData(String name, double salary, LocalDate startDate, String gender) {
+        employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name, salary, startDate, gender));
+	}
 }

@@ -36,7 +36,7 @@ public class EmployeePayrollServiceTest {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
 		System.out.println(employeePayrollData);
-		Assert.assertEquals(3, employeePayrollData.size());
+		Assert.assertEquals(4, employeePayrollData.size());
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class EmployeePayrollServiceTest {
 		LocalDate endDate = LocalDate.now();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService
 				.readEmployeePayrollForDateRange(IOService.DB_IO, startDate, endDate);
-		Assert.assertEquals(3, employeePayrollData.size());
+		Assert.assertEquals(4, employeePayrollData.size());
 	}
 
 	@Test
@@ -83,4 +83,14 @@ public class EmployeePayrollServiceTest {
 		Double avgSalaryFemale = 3000000.0;
 		Assert.assertEquals(avgSalaryFemale, genderToAverageSalaryMap.get("F"));
 	}
+	
+	@ Test
+	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);	
+		employeePayrollService.addEmployeePayrollData("Charles", 50000.0, LocalDate.now(), "M");
+		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Charles");
+		Assert.assertTrue(result);
+	}
+	
 }
