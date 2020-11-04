@@ -12,8 +12,9 @@ public class EmployeePayrollService {
 	}
 
 	private List<EmployeePayrollData> employeePayrollList;
-	private EmployeePayrollDBService employeePayrollDBService;
 	private Map<String, Double> genderToAverageSalaryMap;
+	private EmployeePayrollDBService employeePayrollDBService;
+	private EmployeePayrollDBServiceNormalised employeePayrollDBServiceNew;
 
 	public EmployeePayrollService(List<EmployeePayrollData> employeePayrollList) {
 		this();
@@ -22,6 +23,16 @@ public class EmployeePayrollService {
 
 	public EmployeePayrollService() {
 		employeePayrollDBService = EmployeePayrollDBService.getInstance();
+		employeePayrollDBServiceNew = EmployeePayrollDBServiceNormalised.getInstance();
+	}
+
+	public static void main(String[] args) {
+		System.out.println("Welcome to Employee Payroll Service");
+		ArrayList<EmployeePayrollData> employeePayrollList = new ArrayList<>();
+		EmployeePayrollService employeePayroll = new EmployeePayrollService(employeePayrollList);
+		Scanner consoleInputReader = new Scanner(System.in);
+		employeePayroll.readEmployeePayrollData(consoleInputReader);
+		employeePayroll.writeEmployeePayrollData(IOService.CONSOLE_IO);
 	}
 
 	private void readEmployeePayrollData(Scanner consoleInputReader) {
@@ -40,15 +51,6 @@ public class EmployeePayrollService {
 		else if (ioService.equals(IOService.FILE_IO)) {
 			new EmployeePayrollFileIOService().writeData(employeePayrollList);
 		}
-	}
-
-	public static void main(String[] args) {
-		System.out.println("Welcome to Employee Payroll Service");
-		ArrayList<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-		EmployeePayrollService employeePayroll = new EmployeePayrollService(employeePayrollList);
-		Scanner consoleInputReader = new Scanner(System.in);
-		employeePayroll.readEmployeePayrollData(consoleInputReader);
-		employeePayroll.writeEmployeePayrollData(IOService.CONSOLE_IO);
 	}
 
 	public void printData(IOService fileIo) {
@@ -77,19 +79,21 @@ public class EmployeePayrollService {
 	}
 
 	public void updateEmployeeSalary(String name, double salary) throws PayrollSystemException {
-		int result = employeePayrollDBService.updateEmployeeData(name, salary);
-		if (result == 0) {
-			throw new PayrollSystemException("no rows updated",
-					PayrollSystemException.ExceptionType.UPDATE_FILE_EXCEPTION); // throwing a custom exception if no
-																					// records updated
+		try {
+			int result = employeePayrollDBService.updateEmployeeData(name, salary);
+			if (result == 0) {
+				throw new PayrollSystemException("no rows updated",
+						PayrollSystemException.ExceptionType.UPDATE_FILE_EXCEPTION);
+			}
+			EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
+			if (employeePayrollData != null)
+				employeePayrollData.salary = salary;
+		} catch (PayrollSystemException e) {
+			System.out.println(e);
 		}
-		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
-		if (employeePayrollData != null) // if its not null we update the salary
-			employeePayrollData.salary = salary;
 	}
 
 	private EmployeePayrollData getEmployeePayrollData(String name) {
-		// converting list into stream and filtering by name
 		return this.employeePayrollList.stream().filter(empPayrollDataItem -> empPayrollDataItem.name.equals(name))
 				.findFirst().orElse(null);
 	}
@@ -103,7 +107,7 @@ public class EmployeePayrollService {
 			LocalDate endDate) {
 		if (ioService.equals(IOService.DB_IO))
 			this.employeePayrollList = employeePayrollDBService.getEmployeeForDateRange(startDate, endDate);
-		return this.employeePayrollList;
+		return employeePayrollList;
 	}
 
 	public Map<String, Double> getAvgSalary(IOService ioService) throws PayrollSystemException {
@@ -120,7 +124,8 @@ public class EmployeePayrollService {
 		return genderToAverageSalaryMap;
 	}
 
-	public void addEmployeePayrollData(String name, double salary, LocalDate startDate, String gender) {
-        employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name, salary, startDate, gender));
+	public void addEmployeePayrollData(String name, double salary, LocalDate startDate, String gender)
+			throws PayrollSystemException {
+		employeePayrollList.add(employeePayrollDBServiceNew.addEmployeePayrollData(name, salary, startDate, gender));
 	}
 }

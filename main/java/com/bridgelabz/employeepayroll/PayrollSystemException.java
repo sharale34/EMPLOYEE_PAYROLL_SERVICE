@@ -3,7 +3,7 @@ package com.bridgelabz.employeepayroll;
 public class PayrollSystemException extends Exception {
 
 	enum ExceptionType {
-		UPDATE_FILE_EXCEPTION,  RETRIEVE_EXCEPTION
+		UPDATE_FILE_EXCEPTION, RETRIEVE_EXCEPTION, INSERT_EXCEPTION
 	}
 
 	ExceptionType type;

@@ -83,14 +83,13 @@ public class EmployeePayrollServiceTest {
 		Double avgSalaryFemale = 3000000.0;
 		Assert.assertEquals(avgSalaryFemale, genderToAverageSalaryMap.get("F"));
 	}
-	
-	@ Test
-	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() {
+
+	@Test
+	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() throws PayrollSystemException {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
-		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);	
+		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
 		employeePayrollService.addEmployeePayrollData("Charles", 50000.0, LocalDate.now(), "M");
 		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Charles");
 		Assert.assertTrue(result);
 	}
-	
 }
